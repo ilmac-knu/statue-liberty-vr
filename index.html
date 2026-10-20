@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>자유의 여신상 VR 360도 체험</title>
+  <script src="https://aframe.io/releases/1.8.0/aframe.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; font-family: Arial, 'Malgun Gothic', sans-serif; background: #111; }
+    a-scene { position: fixed !important; inset: 0; }
+    .ui { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
+    .title { position: absolute; top: max(14px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); padding: 12px 20px; border-radius: 28px; color: white; background: rgba(0,0,0,.66); font-size: clamp(16px, 3.4vw, 23px); font-weight: 800; white-space: nowrap; text-align: center; max-width: 95vw; }
+    .next { pointer-events: auto; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 108px; height: 108px; min-width: 88px; min-height: 88px; border-radius: 50%; border: 6px solid #b9b9b9; background: #fff; color: #000; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 14px #0006; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    .next svg { width: 57px; height: 57px; }
+    .next:focus-visible { outline: 4px solid #ffe04a; outline-offset: 4px; }
+    .next:active { transform: translate(-50%,-50%) scale(.94); }
+    .hint { position: absolute; bottom: max(22px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); padding: 8px 12px; border-radius: 16px; color: white; background: #0009; font-size: 13px; text-align: center; white-space: nowrap; }
+    .fade { position: absolute; inset: 0; background: black; opacity: 0; transition: opacity .22s; pointer-events: none; }
+    .fade.active { opacity: 1; }
+    @media (max-width: 420px) { .title { font-size: 16px; padding: 11px 15px; } .next { width: 94px; height: 94px; } .next svg { width: 49px; height: 49px; } .hint { font-size: 11px; } }
+  </style>
+</head>
+<body>
+  <a-scene embedded vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: true" renderer="antialias: true; colorManagement: true">
+    <a-assets timeout="20000">
+      <img id="boat" src="vr1-boat.jpg" crossorigin="anonymous">
+      <img id="island" src="vr2-island.jpg" crossorigin="anonymous">
+    </a-assets>
+    <a-sky id="panorama" src="#boat" radius="100" rotation="0 0 0"></a-sky>
+    <a-entity camera="fov: 80" look-controls="touchEnabled: true; mouseEnabled: true" position="0 0 0"></a-entity>
+  </a-scene>
+  <div class="ui">
+    <div class="fade" id="fade"></div>
+    <div class="title" id="title" aria-live="polite">VR1 배에서 본 자유의 여신상</div>
+    <button class="next" id="next" type="button" aria-label="VR2 섬에서 본 자유의 여신상으로 이동" title="다음 VR 장면으로 이동">
+      <svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 32h40M34 15l17 17-17 17"/></svg>
+    </button>
+    <div class="hint">화면을 드래그하여 360° 둘러보기 · 가운데 화살표로 장면 이동</div>
+  </div>
+  <script>
+    const scenes = [
+      { image: '#boat', title: 'VR1 배에서 본 자유의 여신상' },
+      { image: '#island', title: 'VR2 섬에서 본 자유의 여신상' }
+    ];
+    let current = 0;
+    let switching = false;
+    const sky = document.getElementById('panorama');
+    const title = document.getElementById('title');
+    const button = document.getElementById('next');
+    const fade = document.getElementById('fade');
+    button.addEventListener('click', () => {
+      if (switching) return;
+      switching = true;
+      fade.classList.add('active');
+      window.setTimeout(() => {
+        current = (current + 1) % scenes.length;
+        sky.setAttribute('src', scenes[current].image);
+        title.textContent = scenes[current].title;
+        const target = scenes[(current + 1) % scenes.length].title;
+        button.setAttribute('aria-label', target + '으로 이동');
+        window.setTimeout(() => { fade.classList.remove('active'); switching = false; }, 120);
+      }, 240);
+    });
+  </script>
+</body>
+</html>
